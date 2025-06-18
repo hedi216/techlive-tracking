@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: techlive-tracking
+    env: python
+    buildCommand: ""
+    startCommand: "python app_tracking.py"
+    envVars:
+      - key: FLASK_ENV
+        value: production
