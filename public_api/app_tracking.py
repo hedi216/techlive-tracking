@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 #import mysql.connector
 import os
 import psycopg2
+import psycopg2.extras  
 app = Flask(__name__, template_folder='templates')
 
 
@@ -30,7 +31,7 @@ def track():
         return jsonify({"error": "Numéro de téléphone invalide."})
 
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if code:
         cursor.execute("SELECT * FROM reparations WHERE code_reparation = %s AND numero_tel = %s", (code, tel))
