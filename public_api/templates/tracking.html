@@ -47,21 +47,22 @@
             data.data.forEach(rep => {
               html += `
                 <div class="card mb-3">
-                  <div class="card-header fw-bold">${rep.code_reparation} - ${rep.type_appareil} - ${rep.modele}</div>
+                  <div class="card-header fw-bold">${rep.code_reparation || "—"} - ${rep.type_appareil || "—"} - ${rep.modele || "—"}</div>
                   <div class="card-body">
-                    <p><strong>OS :</strong> ${rep.os}</p>
-                    <p><strong>Panne :</strong> ${rep.panne}</p>
-                    <p><strong>Montant :</strong> ${rep.montant_total} TND | <strong>Acompte :</strong> ${rep.acompte} TND</p>
-                    <p><strong>Paiement :</strong> ${rep.paiement_effectue === "1" ? "Oui" : "Non"}</p>
-                    <p><strong>Statut :</strong> ${rep.statut}</p>
+                    <p><strong>OS :</strong> ${rep.os || "—"}</p>
+                    <p><strong>Panne :</strong> ${rep.panne || "—"}</p>
+                    <p><strong>Montant :</strong> ${rep.montant_total ?? "0"} TND | <strong>Acompte :</strong> ${rep.acompte ?? "0"} TND</p>
+                    <p><strong>Paiement :</strong> ${(rep.paiement_effectue === true || rep.paiement_effectue === "1") ? "Oui" : "Non"}</p>
+                    <p><strong>Statut :</strong> ${rep.statut || "—"}</p>
                   </div>
                 </div>`;
             });
-            div.innerHTML = html;
+            div.innerHTML = html || `<div class="alert alert-info">Aucune réparation trouvée.</div>`;
           }
         })
-        .catch(() => {
+        .catch(err => {
           div.innerHTML = `<div class="alert alert-danger">Une erreur est survenue. Veuillez réessayer.</div>`;
+          console.error("Erreur fetch:", err);
         });
     }
   </script>
