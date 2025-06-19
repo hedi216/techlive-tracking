@@ -44,6 +44,8 @@
             div.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
           } else {
             let html = "";
+            console.log("réponse API", data);
+            console.log("reparation :", rep);
             data.data.forEach(rep => {
               html += `
                 <div class="card mb-3">
