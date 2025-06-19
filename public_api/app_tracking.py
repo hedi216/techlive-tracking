@@ -1,12 +1,9 @@
 from flask import Flask, request, jsonify, render_template
-#import mysql.connector
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
 app = Flask(__name__, template_folder='templates')
-
-
 
 def get_connection():
     return psycopg2.connect(
@@ -17,7 +14,6 @@ def get_connection():
         port="5432",
         sslmode="require"
     )
-
 
 @app.route('/')
 def index():
@@ -31,27 +27,33 @@ def track():
     if not tel or not tel.isdigit() or len(tel) != 8:
         return jsonify({"error": "Numéro de téléphone invalide."})
 
-    conn = get_connection()
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-    if code:
-        cursor.execute("SELECT * FROM reparations WHERE code_reparation = %s AND numero_tel = %s", (code, tel))
-        row = cursor.fetchone()
-        if row:
-            return jsonify({"data": [row]})
+        if code:
+            cursor.execute("SELECT * FROM reparations WHERE code_reparation = %s AND numero_tel = %s", (code, tel))
+            row = cursor.fetchone()
+            if row:
+                return jsonify({"data": [row]})
+            else:
+                return jsonify({"error": "Aucune réparation trouvée avec ce code et ce numéro."})
         else:
-            return jsonify({"error": "Aucune réparation trouvée avec ce code et ce numéro."})
-    else:
-        cursor.execute("SELECT * FROM reparations WHERE numero_tel = %s ORDER BY date_enregistrement DESC", (tel,))
-        rows = cursor.fetchall()
-        if rows:
-            return jsonify({"data": rows})
-        else:
-            return jsonify({"error": "Aucune réparation trouvée pour ce numéro."})
+            cursor.execute("SELECT * FROM reparations WHERE numero_tel = %s ORDER BY date_enregistrement DESC", (tel,))
+            rows = cursor.fetchall()
+            if rows:
+                return jsonify({"data": rows})
+            else:
+                return jsonify({"error": "Aucune réparation trouvée pour ce numéro."})
 
-    cursor.close()
-    conn.close()
+    except Exception as e:
+        return jsonify({"error": f"Erreur serveur : {str(e)}"})
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
