@@ -5,13 +5,14 @@ import pandas as pd
 from io import BytesIO
 from fpdf import FPDF
 from modules.updates import log_action
+import psycopg2.extras  
 
 def app():
     st.title("🛒 Suivi des achats & bénéfices")
 
     try:
         conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         current_year = datetime.now().year
         current_month = datetime.now().month
@@ -25,8 +26,12 @@ def app():
 
         date_selection = f"{annee}-{mois:02d}"
 
-        cursor.execute("SELECT * FROM reparations WHERE DATE_FORMAT(date_enregistrement, '%Y-%m') = %s", (date_selection,))
+        cursor.execute("""
+            SELECT * FROM reparations 
+            WHERE TO_CHAR(date_enregistrement, 'YYYY-MM') = %s
+        """, (date_selection,))
         reparations_mois = cursor.fetchall()
+
 
         if reparations_mois:
             ids_reparations = [rep["id"] for rep in reparations_mois]

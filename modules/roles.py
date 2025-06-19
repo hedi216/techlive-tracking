@@ -1,12 +1,13 @@
 import streamlit as st
 from db import get_connection
+import psycopg2.extras  
 
 def app():
     st.title("🛡️ Gestion des rôles")
 
     try:
         conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         current_user_role = st.session_state["utilisateur"]["role"]
 

@@ -2,6 +2,7 @@ import streamlit as st
 from db import get_connection
 import hashlib
 import re
+import psycopg2.extras  
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -15,7 +16,7 @@ def app():
 
     try:
         conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         current_user_role = st.session_state["utilisateur"]["role"]
 
         # 🔼 Formulaire d'ajout

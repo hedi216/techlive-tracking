@@ -1,6 +1,8 @@
 import streamlit as st
 from db import get_connection
 import hashlib
+import psycopg2.extras
+
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -40,14 +42,14 @@ def app():
             if submit:
                 try:
                     conn = get_connection()
-                    cursor = conn.cursor(dictionary=True)
+                    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
                     hashed_pw = hash_password(password)
 
                     cursor.execute("""
                         SELECT u.id, u.username, u.role_id, r.nom AS role
                         FROM users u
                         JOIN roles r ON u.role_id = r.id
-                        WHERE u.username = %s AND u.password = %s AND u.actif = 1
+                        WHERE u.username = %s AND u.password = %s AND u.actif = TRUE
                     """, (username, hashed_pw))
 
                     user = cursor.fetchone()

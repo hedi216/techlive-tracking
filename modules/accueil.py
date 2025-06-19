@@ -1,5 +1,6 @@
 import streamlit as st
 from db import get_connection
+import psycopg2.extras  
 
 def app():
     st.title("📱 Application de Réparation - TechLive")
@@ -26,7 +27,7 @@ def app():
         else:
             try:
                 conn = get_connection()
-                cursor = conn.cursor(dictionary=True)
+                cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
                 if prefix == "R":
                     if numero:

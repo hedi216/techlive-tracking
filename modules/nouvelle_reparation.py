@@ -1,6 +1,8 @@
 import streamlit as st
 from db import get_connection
 from modules import updates  # pour log_action
+import psycopg2.extras  
+
 
 def app():
     st.title("➕ Ajouter une nouvelle réparation")
@@ -24,7 +26,6 @@ def app():
         submit = st.form_submit_button("💾 Enregistrer")
 
     if submit:
-        # ✅ Validation stricte avant enregistrement
         if not numero_tel.isdigit():
             st.error("❌ Le numéro de téléphone ne doit contenir que des chiffres.")
             st.stop()
@@ -32,6 +33,8 @@ def app():
             st.error("❌ Le numéro de téléphone doit contenir exactement 8 chiffres.")
             st.stop()
 
+        conn = None
+        cursor = None
         try:
             conn = get_connection()
             cursor = conn.cursor()
@@ -42,6 +45,7 @@ def app():
                     montant_total, acompte, paiement_effectue,
                     type_paiement, statut
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
             """
             values = (
                 type_appareil, os, panne, modele, numero_tel,
@@ -50,11 +54,9 @@ def app():
                 type_paiement, statut
             )
             cursor.execute(insert_query, values)
-            conn.commit()
+            dernier_id = cursor.fetchone()[0]
 
-            dernier_id = cursor.lastrowid
             code_reparation = f"R-{dernier_id:07d}"
-
             cursor.execute("UPDATE reparations SET code_reparation = %s WHERE id = %s", (code_reparation, dernier_id))
             conn.commit()
 
@@ -69,5 +71,7 @@ def app():
         except Exception as e:
             st.error(f"❌ Erreur lors de l'enregistrement : {e}")
         finally:
-            cursor.close()
-            conn.close()
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()

@@ -1,5 +1,6 @@
 import streamlit as st
 from db import get_connection
+import psycopg2.extras  
 
 def log_action(action_type, target_type, detail):
     """Log une action dans la base de données"""
@@ -23,7 +24,7 @@ def app():
 
     try:
         conn = get_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
         # Filtres
         st.markdown("### 🔎 Filtres")
