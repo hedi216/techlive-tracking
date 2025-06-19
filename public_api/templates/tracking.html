@@ -40,12 +40,12 @@
       fetch(`/track?tel=${encodeURIComponent(tel)}&code=${encodeURIComponent(code)}`)
         .then(res => res.json())
         .then(data => {
+          console.log("réponse API", data);
+
           if (data.error) {
             div.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-          } else {
+          } else if (data.data && data.data.length > 0) {
             let html = "";
-            console.log("réponse API", data);
-            console.log("reparation :", rep);
             data.data.forEach(rep => {
               html += `
                 <div class="card mb-3">
@@ -59,12 +59,14 @@
                   </div>
                 </div>`;
             });
-            div.innerHTML = html || `<div class="alert alert-info">Aucune réparation trouvée.</div>`;
+            div.innerHTML = html;
+          } else {
+            div.innerHTML = `<div class="alert alert-info">Aucune réparation trouvée.</div>`;
           }
         })
         .catch(err => {
-          div.innerHTML = `<div class="alert alert-danger">Une erreur est survenue. Veuillez réessayer.</div>`;
           console.error("Erreur fetch:", err);
+          div.innerHTML = `<div class="alert alert-danger">Une erreur est survenue. Veuillez réessayer.</div>`;
         });
     }
   </script>
